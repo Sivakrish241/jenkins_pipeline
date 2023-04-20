@@ -1,23 +1,33 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Stop Container') {
+        stage('Add Jenkins user to Docker group') {
             steps {
-                sh 'docker stop my-node-app || true' // the `|| true` prevents the build from failing if the container is not running
+                sh 'sudo usermod -aG docker jenkins'
             }
         }
-        stage('Remove Container') {
+        
+        stage('Restart Docker') {
             steps {
+                sh 'sudo systemctl restart docker'
+            }
+        }
+        
+        stage('Stop and remove container') {
+            steps {
+                sh 'docker stop my-node-app || true'
                 sh 'docker rm my-node-app || true'
             }
         }
-        stage('Build Image') {
+        
+        stage('Build Docker image') {
             steps {
                 sh 'docker build -t my-node-app .'
             }
         }
-        stage('Start Container') {
+        
+        stage('Run Docker container') {
             steps {
                 sh 'docker run -d --name my-node-app -p 3000:3000 my-node-app'
             }

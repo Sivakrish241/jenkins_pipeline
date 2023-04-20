@@ -2,18 +2,6 @@ pipeline {
     agent any
     
     stages {
-        stage('Declarative: Checkout SCM') {
-            steps {
-                checkout([$class: 'GitSCM', 
-                          branches: [[name: '*/master']], 
-                          doGenerateSubmoduleConfigurations: false, 
-                          extensions: [], 
-                          submoduleCfg: [], 
-                          userRemoteConfigs: [[credentialsId: '65eeec4d-0e38-46aa-b240-12e4d39b3508', 
-                                              url: 'https://github.com/Sivakrish241/jenkins_pipeline.git']]])
-            }
-        }
-        
         stage('Add Jenkins to Docker group') {
             steps {
                 sh 'sudo usermod -aG docker jenkins'
@@ -34,18 +22,8 @@ pipeline {
         
         stage('Stop and remove existing container') {
             steps {
-                script {
-                    try {
-                        sh 'docker stop my-node-app'
-                    } catch (err) {
-                        echo 'No container to stop'
-                    }
-                    try {
-                        sh 'docker rm my-node-app'
-                    } catch (err) {
-                        echo 'No container to remove'
-                    }
-                }
+                sh 'docker stop my-node-app || true'
+                sh 'docker rm my-node-app || true'
             }
         }
         
